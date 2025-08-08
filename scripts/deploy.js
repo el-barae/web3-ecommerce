@@ -8,7 +8,7 @@ async function main() {
   const Ecommerce = await hre.ethers.getContractFactory("Ecommerce");
   const ecommerce = await Ecommerce.deploy();
 
-  await ecommerce.waitForDeployment(); // For ethers v6
+  await ecommerce.waitForDeployment();
 
   const contractAddress = await ecommerce.getAddress();
   console.log("Contract deployed to:", contractAddress);

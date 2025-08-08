@@ -6,9 +6,9 @@ module.exports = {
   solidity: "0.8.28",
   networks: {
     ganache: {
-      url: "http://127.0.0.1:7545",
+      url: process.env.URL,
       accounts: [
-        "0x253e1746bece4f6cf3a46d8f127d23aae7ad704302c2c51dba4f57b82aad77f2"
+        process.env.account
       ],
     }
   }
