@@ -17,25 +17,29 @@ contract Ecommerce {
         string gender;
         bool isSeller;
         string email;
-        string password; 
         uint256 balance;
     }
+
 
     mapping(address => User) public users;
     Commodity[] public commodities;
 
-    // Register a new user with email, password, and initial balance
     function register(
         string memory _firstName,
         string memory _lastName,
         uint256 _age,
         string memory _gender,
         bool _isSeller,
-        string memory _email,
-        string memory _password
+        string memory _email
     ) public {
-        users[msg.sender] = User(_firstName, _lastName, _age, _gender, _isSeller, _email, _password, 0);
+        users[msg.sender] = User(_firstName, _lastName, _age, _gender, _isSeller, _email, 0);
     }
+
+    function deposit() public payable {
+        require(msg.value > 0, "Montant invalide");
+        users[msg.sender].balance += msg.value;
+    }
+
 
     // Add a new commodity to the marketplace
     function addCommodity(
@@ -50,17 +54,17 @@ contract Ecommerce {
     }
 
     // Allow users to buy commodities
-    function buyCommodity(uint _index) public payable {
+    function buyCommodity(uint _index) public {
         Commodity storage item = commodities[_index];
         require(item.quantity > 0, "Out of stock");
-        require(msg.value >= item.value, "Insufficient funds");
+        require(users[msg.sender].balance >= item.value, "Solde insuffisant");
 
-        // Deduct from user's balance
         users[msg.sender].balance -= item.value;
-
         item.quantity -= 1;
-        payable(item.seller).transfer(msg.value);
+
+        payable(item.seller).transfer(item.value); // Transfert au vendeur
     }
+
 
     // Get all commodities in the marketplace
     function getCommodities() public view returns (Commodity[] memory) {
@@ -86,8 +90,16 @@ contract Ecommerce {
         users[msg.sender].balance += _amount;
     }
 
-    // Get user's balance
-    function getBalance(address _userAddress) public view returns (uint256) {
-        return users[_userAddress].balance;
+    function getMyProfile() public view returns (User memory) {
+        return users[msg.sender];
     }
+
+    function getBalance(address _user) public view returns (uint256) {
+        return users[_user].balance;
+    }
+
+    function getEthBalance(address _user) public view returns (uint256) {
+        return _user.balance;
+    }
+
 }
