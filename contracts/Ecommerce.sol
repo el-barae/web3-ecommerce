@@ -86,7 +86,7 @@ contract Ecommerce {
     function buyCommodity(uint _index, uint _quantity) public {
         Commodity storage item = commodities[_index];
         require(item.quantity >= _quantity, "Not enough stock");
-        uint256 totalCost = item.value * _quantity;
+        uint256 totalCost = (item.value * 1 gwei) * _quantity;
         require(users[msg.sender].balance >= totalCost, "Solde insuffisant");
 
         users[msg.sender].balance -= totalCost;
