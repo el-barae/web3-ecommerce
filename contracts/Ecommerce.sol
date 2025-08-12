@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 contract Ecommerce {
@@ -8,6 +9,7 @@ contract Ecommerce {
         uint256 quantity;
         string company;
         address seller;
+        string image; // Lien image (URL ou IPFS)
     }
 
     struct User {
@@ -18,6 +20,7 @@ contract Ecommerce {
         bool isSeller;
         string email;
         uint256 balance;
+        string image; // Lien image (URL ou IPFS)
     }
 
     struct Order {
@@ -35,33 +38,45 @@ contract Ecommerce {
     Order[] public orders;
     mapping(address => uint256[]) public userOrders;
 
-    // Enregistrer un utilisateur
+    // Enregistrer un utilisateur avec image
     function register(
         string memory _firstName,
         string memory _lastName,
         uint256 _age,
         string memory _gender,
         bool _isSeller,
-        string memory _email
+        string memory _email,
+        string memory _image
     ) public {
-        users[msg.sender] = User(_firstName, _lastName, _age, _gender, _isSeller, _email, 0);
+        users[msg.sender] = User(
+            _firstName,
+            _lastName,
+            _age,
+            _gender,
+            _isSeller,
+            _email,
+            0,
+            _image
+        );
     }
 
-    // Modifier son profil
+    // Modifier son profil avec image
     function updateProfile(
         string memory _firstName,
         string memory _lastName,
         uint256 _age,
         string memory _gender,
-        string memory _email
+        string memory _email,
+        string memory _image
     ) public {
         User storage user = users[msg.sender];
-        require(bytes(user.firstName).length > 0, "User not registered"); // Vérifie que l'utilisateur existe
+        require(bytes(user.firstName).length > 0, "User not registered");
         user.firstName = _firstName;
         user.lastName = _lastName;
         user.age = _age;
         user.gender = _gender;
         user.email = _email;
+        user.image = _image;
     }
 
     // Dépôt d'ETH dans le solde interne
@@ -70,16 +85,19 @@ contract Ecommerce {
         users[msg.sender].balance += msg.value;
     }
 
-    // Ajouter un produit
+    // Ajouter un produit avec image
     function addCommodity(
         string memory _name,
         string memory _category,
         uint256 _value,
         uint256 _quantity,
-        string memory _company
+        string memory _company,
+        string memory _image
     ) public {
         require(users[msg.sender].isSeller, "Only sellers can add commodities");
-        commodities.push(Commodity(_name, _category, _value, _quantity, _company, msg.sender));
+        commodities.push(
+            Commodity(_name, _category, _value, _quantity, _company, msg.sender, _image)
+        );
     }
 
     // Acheter un produit
@@ -94,7 +112,9 @@ contract Ecommerce {
         payable(item.seller).transfer(totalCost);
 
         uint256 orderId = orders.length;
-        orders.push(Order(orderId, msg.sender, _index, _quantity, totalCost, block.timestamp, "Pending"));
+        orders.push(
+            Order(orderId, msg.sender, _index, _quantity, totalCost, block.timestamp, "Pending")
+        );
         userOrders[msg.sender].push(orderId);
     }
 
@@ -134,10 +154,20 @@ contract Ecommerce {
         string memory gender, 
         bool isSeller, 
         string memory email,
-        uint256 balance
+        uint256 balance,
+        string memory image
     ) {
         User storage user = users[_userAddress];
-        return (user.firstName, user.lastName, user.age, user.gender, user.isSeller, user.email, user.balance);
+        return (
+            user.firstName, 
+            user.lastName, 
+            user.age, 
+            user.gender, 
+            user.isSeller, 
+            user.email, 
+            user.balance,
+            user.image
+        );
     }
 
     function getMyProfile() public view returns (User memory) {
