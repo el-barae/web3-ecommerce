@@ -100,23 +100,44 @@ contract Ecommerce {
         );
     }
 
-    // Acheter un produit
-    function buyCommodity(uint _index, uint _quantity) public {
+    // Version modifiée de la fonction buyCommodity pour paiement direct
+    function buyCommodity(uint _index, uint _quantity) public payable {
         Commodity storage item = commodities[_index];
         require(item.quantity >= _quantity, "Not enough stock");
+        
         uint256 totalCost = (item.value * 1 gwei) * _quantity;
-        require(users[msg.sender].balance >= totalCost, "Solde insuffisant");
-
-        users[msg.sender].balance -= totalCost;
+        require(msg.value >= totalCost, "Paiement insuffisant");
+        
+        // Réduire le stock
         item.quantity -= _quantity;
+        
+        // Transférer le paiement directement au vendeur
         payable(item.seller).transfer(totalCost);
-
+        
+        // Si l'utilisateur a payé plus que nécessaire, rembourser la différence
+        if (msg.value > totalCost) {
+            payable(msg.sender).transfer(msg.value - totalCost);
+        }
+        
+        // Créer la commande
         uint256 orderId = orders.length;
         orders.push(
             Order(orderId, msg.sender, _index, _quantity, totalCost, block.timestamp, "Pending")
         );
         userOrders[msg.sender].push(orderId);
+        
+        // Émettre un événement pour le suivi
+        emit CommodityPurchased(msg.sender, _index, _quantity, totalCost, orderId);
     }
+
+    // Ajout d'un événement pour le suivi des achats
+    event CommodityPurchased(
+        address indexed buyer,
+        uint indexed commodityIndex,
+        uint quantity,
+        uint256 totalCost,
+        uint256 orderId
+    );
 
     // Changer le statut d'une commande
     function updateOrderStatus(uint256 _orderId, string memory _status) public {

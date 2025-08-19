@@ -5,6 +5,10 @@ require("dotenv").config();
 module.exports = {
   solidity: "0.8.28",
   networks: {
+    sepolia: {
+      url: `https://sepolia.infura.io/v3/d1b840e1289f481ea53dea801e827197`,  // Make sure this is the Sepolia URL
+      accounts: [`f70f45bc9e587b2ffd0a49a3ee75523268b399eeee2e206946d874563178208d`]
+    },
     ganache: {
       url: "http://127.0.0.1:7545",
       accounts: [
