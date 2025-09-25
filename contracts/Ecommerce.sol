@@ -100,6 +100,29 @@ contract Ecommerce {
         );
     }
 
+    // Modifier un produit existant
+    function updateCommodity(
+        uint256 _index,
+        string memory _name,
+        string memory _category,
+        uint256 _value,
+        uint256 _quantity,
+        string memory _company,
+        string memory _image
+    ) public {
+        require(_index < commodities.length, "Produit inexistant");
+        Commodity storage item = commodities[_index];
+        require(msg.sender == item.seller, "Seul le vendeur peut modifier son produit");
+
+        item.name = _name;
+        item.category = _category;
+        item.value = _value;
+        item.quantity = _quantity;
+        item.company = _company;
+        item.image = _image;
+    }
+
+
     // Version modifiée de la fonction buyCommodity pour paiement direct
     function buyCommodity(uint _index, uint _quantity) public payable {
         Commodity storage item = commodities[_index];
